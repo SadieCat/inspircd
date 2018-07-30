@@ -467,30 +467,24 @@
 # CHGHOST module: Adds the /CHGHOST command.
 # This module is oper-only.
 # To use, CHGHOST must be in one of your oper class blocks.
-# NOTE: Services will not be able to set vhosts on users if this module
-# isn't loaded. If you're planning on running services, you probably
-# want to load this.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="chghost">
-#
-#-#-#-#-#-#-#-#-# /CHGHOST - /SETHOST  CONFIGURATION #-#-#-#-#-#-#-#-#
-# Optional - If you want to use special chars for hostnames you can  #
-# specify your own custom list of chars with the <hostname> tag:     #
-#                                                                    #
-# charmap        - A list of chars accepted as valid by the /CHGHOST #
-#                  and /SETHOST commands. Also note that the list is #
-#                  case-sensitive.                                   #
-#<hostname charmap="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_/0123456789">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # CHGIDENT module: Adds the /CHGIDENT command.
 # This module is oper-only.
 # To use, CHGIDENT must be in one of your oper class blocks.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="chgident">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # CHGNAME module: Adds the /CHGNAME command.
 # This module is oper-only.
 # To use, CHGNAME must be in one of your oper class blocks.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="chgname">
 #
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1747,6 +1741,8 @@
 # users' nicks.
 # This module is oper-only.
 # To use, SANICK must be in one of your oper class blocks.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="sanick">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -1836,17 +1832,22 @@
 # Sethost module: Adds the /SETHOST command.
 # This module is oper-only.
 # To use, SETHOST must be in one of your oper class blocks.
-# See the chghost module for how to customise valid chars for hostnames.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="sethost">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Setident module: Adds the /SETIDENT command.
 # This module is oper-only.
 # To use, SETIDENT must be in one of your oper class blocks.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="setident">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # SETNAME module: Adds the /SETNAME command.
+# NOTE: This module is deprecated and will be removed in a future version
+# of InspIRCd. You should use the usermod module instead.
 #<module name="setname">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -2100,6 +2101,39 @@
 # Allows users to query their own IP, also allows opers to query the IP
 # of anyone else.
 #<module name="userip">
+
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# USERMOD module: Adds the /USERMOD command that allows you to change
+# user attributes. Valid user attributes are "host", "nick", "real", or
+# "user".
+# NOTE: Services will not be able to set vhosts on users if this module
+# isn't loaded. If you're planning on running services, you probably
+# want to load this.
+# This module is oper-only.
+# To use, USERMOD must be in one of your oper class blocks and you must
+# have the usermod/<attribute>-{others,self} privilege permissions.
+#<module name="usermod">
+#
+# This module deprecates the chghost, chgident, chgname, sanick,
+# sethost, setident, and setname modules. If you wish to keep these
+# commands then you should load the alias module and uncomment the
+# following aliases:
+#
+#<alias text="CHGHOST"  replace="USERMOD host $1 :$2-" operonly="yes">
+#<alias text="CHGIDENT" replace="USERMOD user $1 :$2-" operonly="yes">
+#<alias text="CHGNAME"  replace="USERMOD real $1 :$2-" operonly="yes">
+#<alias text="SANICK"   replace="USERMOD nick $1 :$2-" operonly="yes">
+#<alias text="SETHOST"  replace="USERMOD host :$1-"    operonly="yes">
+#<alias text="SETIDENT" replace="USERMOD user :$1-"    operonly="yes">
+#<alias text="SETNAME"  replace="USERMOD real :$1-"    operonly="yes">
+#
+#-#–#-#-#-#-#-#-#-# USERMOD HOSTNAME CONFIGURATION #-#-#-#-#-#-#-#-#-#
+# Optional - If you want to use special chars for hostnames you can  #
+# specify your own custom list of chars with the <hostname> tag:     #
+#                                                                    #
+# charmap        - A case-sensitive list of characters accepted as   #
+#                  valid by the /USERMOD command.                    #
+#<hostname charmap="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-./_">
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # Vhost module: Adds the VHOST command which allows for adding virtual
