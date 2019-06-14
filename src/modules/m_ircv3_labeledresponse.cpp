@@ -150,6 +150,7 @@ class ModuleIRCv3LabeledResponse : public Module
 			case 1:
 			{
 				// There was one response which was cached; send it now.
+				firstmsg->AddTag("draft/label", &tag, label);
 				FlushFirstMsg(user);
 				break;
 			}
@@ -162,7 +163,6 @@ class ModuleIRCv3LabeledResponse : public Module
 					// Set end start as side effect so we'll ignore it otherwise it'd end up added into the batch.
 					ClientProtocol::Message& batchendmsg = batch.GetBatchEndMessage();
 					batchendmsg.SetSideEffect(true);
-					batchendmsg.AddTag("draft/label", &tag, label);
 
 					batchmanager->End(batch);
 				}
@@ -184,7 +184,6 @@ class ModuleIRCv3LabeledResponse : public Module
 		if (msg.IsSideEffect())
 			return MOD_RES_PASSTHRU;
 
-		msg.AddTag("draft/label", &tag, label);
 		switch (++msgcount)
 		{
 			case 1:
