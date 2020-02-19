@@ -78,12 +78,29 @@ class STSCap : public Cap::Capability
 		// TODO: Send duration=0 when STS vanishes.
 	}
 
-	void SetPolicy(const std::string& newhost, unsigned long duration, unsigned int port, bool preload)
+	void SetPolicy(const std::string& newhost, unsigned long duration, unsigned int port, bool preload, bool hostmatch)
 	{
-		// To enforce an STS upgrade policy, servers MUST send this key to insecurely connected clients. Servers
-		// MAY send this key to securely connected clients, but it will be ignored.
-		std::string newplaintextpolicy("port=");
-		newplaintextpolicy.append(ConvToStr(port));
+		std::string newplaintextpolicy;
+		if (hostmatch)
+		{
+			// `if-host-match`: List of hostnames and hostname patterns to match against, separated by pipes (`|`).
+			// This uses regular IRC 'glob' syntax, where `?` matches any single character and `*` matches zero or
+			// more characters.
+			// `port-if-match`: This is the port to connect to.
+			newplaintextpolicy
+				.append("if-host-match=")
+				.append(newhost)
+				.append(",port-if-match=")
+				.append(ConvToStr(port));
+		}
+		else
+		{
+			// To enforce an STS upgrade policy, servers MUST send this key to insecurely connected clients. Servers
+			// MAY send this key to securely connected clients, but it will be ignored.
+			newplaintextpolicy
+				.append("port=")
+				.append(ConvToStr(port));
+		}
 
 		// To enforce an STS persistence policy, servers MUST send this key to securely connected clients. Servers
 		// MAY send this key to all clients, but insecurely connected clients MUST ignore it.
@@ -173,7 +190,8 @@ class ModuleIRCv3STS : public Module
 
 		unsigned long duration = tag->getDuration("duration", 5*60, 60);
 		bool preload = tag->getBool("preload");
-		cap.SetPolicy(host, duration, port, preload);
+		bool hostmatch = tag->getBool("hostmatch");
+		cap.SetPolicy(host, duration, port, preload, hostmatch);
 
 		if (!cap.IsRegistered())
 			ServerInstance->Modules->AddService(cap);
