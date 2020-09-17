@@ -175,27 +175,27 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 				continue;
 		}
 
-		// if the channel is not private/secret, OR the user is on the channel anyway
-		bool n = (has_privs || chan->HasUser(user));
-
-		// If we're not in the channel and +s is set on it, we want to ignore it
-		if ((n) || (!chan->IsModeSet(secretmode)))
+		// Whether the channel info is hidden to the user.
+		bool can_see_channel = has_privs || chan->HasUser(user);
+		if (!can_see_channel && chan->IsModeSet(secretmode))
 		{
-			if ((!n) && (chan->IsModeSet(privatemode)))
-			{
-				// Channel is private (+p) and user is outside/not privileged
-				user->WriteNumeric(RPL_LIST, '*', users, "");
-			}
-			else if (showmodes)
-			{
-				// Show the list response with the modes and topic.
-				user->WriteNumeric(RPL_LIST, chan->name, users, InspIRCd::Format("[+%s] %s", chan->ChanModes(n), chan->topic.c_str()));
-			}
-			else
-			{
-				// Show the list response with just the modes.
-				user->WriteNumeric(RPL_LIST, chan->name, users, chan->topic);
-			}
+			// The channel is secret (+s) and the user can not see inside it.
+			continue;
+		}
+		else if (!can_see_channel && chan->IsModeSet(privatemode))
+		{
+			// The channel is private (+p) and the user can not see inside it.
+			user->WriteNumeric(RPL_LIST, '*', users, "");
+		}
+		else if (showmodes)
+		{
+			// Show the list response with the modes and topic.
+			user->WriteNumeric(RPL_LIST, chan->name, users, InspIRCd::Format("[+%s] %s", chan->ChanModes(can_see_channel), chan->topic.c_str()));
+		}
+		else
+		{
+			// Show the list response with just the modes.
+			user->WriteNumeric(RPL_LIST, chan->name, users, chan->topic);
 		}
 	}
 	user->WriteNumeric(RPL_LISTEND, "End of channel list.");
