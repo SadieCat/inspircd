@@ -84,6 +84,10 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 	bool match_inverted = false;
 	const char* match = NULL;
 
+	// R: The maximum number of results to return (InspIRCd extension).
+	size_t maxresults = 0;
+	size_t shownresults = 0;
+
 	// T: Searching based on topic time, via the "T<val" and "T>val" modifiers to
 	// search for a topic time that is lower or higher than val respectively.
 	time_t mintopictime = 0;
@@ -113,6 +117,10 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 		else if (!constraint.compare(0, 2, "C>", 2) || !constraint.compare(0, 2, "c>", 2))
 		{
 			maxcreationtime = ParseMinutes(constraint);
+		}
+		else if (!constraint.compare(0, 2, "R=", 2))
+		{
+			maxresults = ConvToNum<size_t>(constraint.c_str() + 2);
 		}
 		else if (!constraint.compare(0, 2, "T<", 2) || !constraint.compare(0, 2, "t<", 2))
 		{
@@ -197,6 +205,10 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 			// Show the list response with just the modes.
 			user->WriteNumeric(RPL_LIST, chan->name, users, chan->topic);
 		}
+
+		// If we have reached the max results then bail out.
+		if (maxresults && ++shownresults >= maxresults)
+			break;
 	}
 	user->WriteNumeric(RPL_LISTEND, "End of channel list.");
 
@@ -222,7 +234,7 @@ class CoreModList : public Module
 
 	void On005Numeric(std::map<std::string, std::string>& tokens) CXX11_OVERRIDE
 	{
-		tokens["ELIST"] = "CMNTU";
+		tokens["ELIST"] = "CMNRTU";
 		tokens["SAFELIST"];
 	}
 
