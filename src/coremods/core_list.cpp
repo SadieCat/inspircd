@@ -84,6 +84,10 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 	bool match_inverted = false;
 	const char* match = NULL;
 
+	// P: Searching based on start/end position (InspIRCd extension).
+	std::string startchan;
+	std::string endchan;
+
 	// R: The maximum number of results to return (InspIRCd extension).
 	size_t maxresults = 0;
 	size_t shownresults = 0;
@@ -117,6 +121,14 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 		else if (!constraint.compare(0, 2, "C>", 2) || !constraint.compare(0, 2, "c>", 2))
 		{
 			maxcreationtime = ParseMinutes(constraint);
+		}
+		else if (!constraint.compare(0, 2, "P<", 2) || !constraint.compare(0, 2, "P<", 2))
+		{
+			startchan = constraint.c_str() + 2;
+		}
+		else if (!constraint.compare(0, 2, "P>", 2) || !constraint.compare(0, 2, "P>", 2))
+		{
+			endchan = constraint.c_str() + 2;
 		}
 		else if (!constraint.compare(0, 2, "R=", 2))
 		{
@@ -168,6 +180,14 @@ CmdResult CommandList::Handle(User* user, const Params& parameters)
 		const time_t topictime = chan->topicset;
 		if ((mintopictime && (!topictime || topictime <= mintopictime)) || (maxtopictime && (!topictime || topictime >= maxtopictime)))
 			continue;
+
+		// Check if the channel name is before the start.
+		if (!startchan.empty() && irc::insensitive_swo()(chan->name, startchan))
+			continue;
+
+		// Check if the channel name is after the end.
+		if (!endchan.empty() && irc::insensitive_swo()(endchan, chan->name))
+			break;
 
 		// Attempt to match a glob pattern.
 		if (match_name_topic)
@@ -234,7 +254,7 @@ class CoreModList : public Module
 
 	void On005Numeric(std::map<std::string, std::string>& tokens) CXX11_OVERRIDE
 	{
-		tokens["ELIST"] = "CMNRTU";
+		tokens["ELIST"] = "CMNPRTU";
 		tokens["SAFELIST"];
 	}
 
