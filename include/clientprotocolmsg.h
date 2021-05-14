@@ -668,9 +668,10 @@ struct ClientProtocol::Messages::Pong : public ClientProtocol::Message
 	Pong(const std::string& cookie, const std::string& server = "")
 		: ClientProtocol::Message("PONG", ServerInstance->Config->ServerName)
 	{
-		PushParamRef(ServerInstance->Config->ServerName);
-		if (!server.empty())
-			PushParamRef(server);
+		if (server.empty())
+			PushParamRef(ServerInstance->Config->ServerName);
+		else
+			PushParam(server);
 		PushParamRef(cookie);
 	}
 };
